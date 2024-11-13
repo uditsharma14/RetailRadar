@@ -46,7 +46,9 @@ def luece_data_processor(data):
         'star_rating': row['star_rating'],
         'helpful_votes': row['helpful_votes'],
         'total_votes': row['total_votes'],
-        'verified_purchase': row['verified_purchase']
+        'verified_purchase': row['verified_purchase'],
+        'compound_score' : row['compound_score'],
+        'sentiment' : row['sentiment']
     }, axis=1)  # Apply this function row-wise
     
     # Convert the DataFrame to JSON format
@@ -54,7 +56,7 @@ def luece_data_processor(data):
 
     # Define the directory and file path where the JSON file will be saved
     directory = 'test'  # Directory where the file will be stored
-    file_path = os.path.join(directory, 'data_to_index.json')  # Path to the file
+    file_path = os.path.join(directory, 'reviews_data_to_index.json')  # Path to the file
 
     # Create the directory if it doesn't exist
     os.makedirs(directory, exist_ok=True)
