@@ -1,9 +1,11 @@
+import os
 import pandas as pd
 from AmazonSentimentAnalsys import get_sentiment
+from LuceneReviewProcesser import luceneIndexBuilder, makeQuery
 from VisualRepresentation import create_bar_graph_for_top_5, create_pie_for_review_sentiment, create_bar_graph_for_top_10_products, create_dual_axis_bar_chart
 
 # Load the dataset with error handling for bad lines
-file_path = '/Users/prabhatsingh/Documents/UIUC/CS410/OurProject/InputData/MoreDetailedInput/amazon_reviews_us_Personal_Care_Appliances_v1_00.tsv'
+file_path = '/Users/uditsharma/Downloads/amazon_reviews_us_Personal_Care_Appliances_v1_00.tsv'
 data = pd.read_csv(file_path, sep='\t', on_bad_lines='skip')
 
 # Preview the dataset
@@ -21,6 +23,42 @@ data = data[['marketplace', 'product_id',
 
 # Apply the function to each review
 data[['compound_score', 'sentiment']] = data['review_body'].apply(get_sentiment).apply(pd.Series)
+
+# Generate the `contents` field by concatenating title, headline, and body
+data_to_index = pd.DataFrame({
+    'id': data.index.astype(str),  # Unique ID based on the index of `data`
+    'contents': data['product_title'] + ' ' + data['review_headline'] + ' ' + data['review_body']  # Concatenated contents
+})
+
+# Define the `NER` field by applying a function that creates a dictionary for each row
+data_to_index['NER'] = data.apply(lambda row: {
+    'marketplace': row['marketplace'],
+    'product_id': row['product_id'],
+    'product_parent': row['product_parent'],
+    'product_title': row['product_title'],
+    'product_category': row['product_category'],
+    'star_rating': row['star_rating'],
+    'helpful_votes': row['helpful_votes'],
+    'total_votes': row['total_votes'],
+    'verified_purchase': row['verified_purchase']
+}, axis=1)
+
+data_json = data_to_index.to_json(orient='records', lines=True)
+# Define the directory path and file name
+directory = 'test'
+file_path = os.path.join(directory, 'data_to_index.json')
+# Create the directory if it doesn't exist
+os.makedirs(directory, exist_ok=True)
+
+# Save the JSON output to the file inside the 'text' directory
+with open(file_path, 'w') as f:
+    f.write(data_json)
+
+print(f"JSON file has been saved to {file_path}.")
+# Usage
+searcher = luceneIndexBuilder(directory)  # First build the index and get the searcher
+makeQuery(searcher)
+
 
 # Unified Product Search function
 def search_product(keyword, df):
