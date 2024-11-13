@@ -6,7 +6,7 @@ def luceneIndexBuilder(directory):
     cmd = [
             "python", "-m", "pyserini.index.lucene",
             "--collection", "JsonCollection",
-            "--input", "test",
+            "--input", directory,
             "--index", "index/test",
             "--generator", "DefaultLuceneDocumentGenerator",
             "--threads", "1",
@@ -17,11 +17,12 @@ def luceneIndexBuilder(directory):
     searcher = LuceneSearcher("index/test")
     return searcher
 
-def makeQuery(searcher):   
+def makeQuery(searcher,keyword):   
     # Perform a search query
-    query = 'The Manhattan Project'
-    hits = searcher.search(f'NER_ORG:{query}')    
+    hits = searcher.search(f'{keyword}')  
+
     # Print the search results with content
+    print(f"Results for query '{keyword}':")
     for i, hit in enumerate(hits, start=1):
         # Retrieve the document by ID
         doc = searcher.doc(hit.docid)
