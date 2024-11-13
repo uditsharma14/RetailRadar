@@ -1,8 +1,26 @@
 import os
 import pandas as pd
+import nltk
+from nltk.corpus import stopwords
 from AmazonSentimentAnalsys import get_sentiment  # Module for sentiment analysis
 from LuceneReviewProcesser import luceneIndexBuilder, makeQuery  # Module for Lucene indexing and search
 from VisualRepresentation import create_bar_graph_for_top_5, create_pie_for_review_sentiment, create_bar_graph_for_top_10_products, create_dual_axis_bar_chart
+
+# Download stopwords if you haven't already
+nltk.download('stopwords')
+# Function to remove stopwords from the text
+
+# Function to remove stopwords from the text
+def remove_stopwords(text):
+    # Ensure the text is a string and handle NaN values
+    if isinstance(text, str):
+        stop_words = set(stopwords.words('english'))  # Get the English stopwords
+        words = text.split()  # Split the text into words
+        filtered_words = [word for word in words if word.lower() not in stop_words]  # Remove stopwords
+        return ' '.join(filtered_words)  # Join the remaining words back into a string
+    else:
+        return ''  # Return an empty string if the text is not a valid string (e.g., NaN or number)
+
 
 # Function to read the review dataset and return a DataFrame
 def review_dataset_reader():
@@ -21,6 +39,9 @@ def review_dataset_reader():
                  'product_parent', 'product_title', 'product_category', 'star_rating',
                  'helpful_votes', 'total_votes', 'verified_purchase',
                  'review_headline', 'review_body']]
+     # Apply stopword removal to the review body and headline
+    data['review_body'] = data['review_body'].apply(remove_stopwords)
+    data['review_headline'] = data['review_headline'].apply(remove_stopwords)
     return data
 
 # Function to calculate sentiment score for each review
@@ -96,16 +117,13 @@ def search_and_rank_products(keyword, df, searcher):
     matched_products = df[df['product_title'].str.contains(keyword, case=False, na=False)]
     
     # Group by product_id and calculate the average sentiment score and average rating
-    ranked_products = matched_products.groupby('product_id', as_index=False).apply(
-        lambda x: pd.Series({
-            'product_id': x['product_id'].iloc[0],  # Get the first product_id
-            'product_title': x['product_title'].iloc[0],  # Get the product_title
-            'avg_sentiment_score': x['compound_score'].mean(),  # Calculate average sentiment score
-            'avg_rating': x['star_rating'].mean()  # Calculate average star rating
-        })
-    ).reset_index(drop=True)
+    ranked_products = matched_products.groupby('product_id').agg(
+        avg_sentiment_score=('compound_score', 'mean'),  # Calculate average sentiment score
+        avg_rating=('star_rating', 'mean'),              # Calculate average rating
+        product_title=('product_title', 'first')         # Take the first title for the product
+    ).reset_index()
 
-    # Sort the products based on average sentiment score and rating, then return the top 10
+    # Sort by avg_sentiment_score and avg_rating in descending order
     ranked_products = ranked_products.sort_values(
         ['avg_sentiment_score', 'avg_rating'], ascending=False
     ).head(10)
