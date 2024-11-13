@@ -48,6 +48,7 @@ def review_dataset_reader():
 def calculate_sentiment_score(data):
     # Apply sentiment calculation on the review body and add the result to the DataFrame
     data[['compound_score', 'sentiment']] = data['review_body'].apply(get_sentiment).apply(pd.Series)
+    return data
 
 # Function to process the data and prepare it for Lucene indexing
 def luece_data_processor(data):
