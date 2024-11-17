@@ -25,7 +25,8 @@ def remove_stopwords(text):
 # Function to read the review dataset and return a DataFrame
 def review_dataset_reader():
     # Load the dataset with error handling for bad lines
-    file_path = '/Users/uditsharma/Downloads/amazon_reviews_us_Personal_Care_Appliances_v1_00.tsv'
+    #file_path = '/Users/uditsharma/Downloads/amazon_reviews_us_Personal_Care_Appliances_v1_00.tsv'
+    file_path = '/Users/prabhatsingh/Documents/UIUC/CS410/OurProject/InputData/MoreDetailedInput/amazon_reviews_us_Personal_Care_Appliances_v1_00.tsv'
     data = pd.read_csv(file_path, sep='\t', on_bad_lines='skip')  # Read the file, skipping any problematic lines
 
     # Preview the dataset (usually just for reference)
@@ -111,9 +112,7 @@ def intelligent_comparison(product_id, df):
     return {"avg_sentiment_score": avg_sentiment_score, "avg_rating": avg_rating}
 
 # Function to search and rank products based on a keyword
-def search_and_rank_products(keyword, df, searcher):
-    # Perform Lucene query to find products containing the keyword in the title
-    makeQuery(searcher,keyword)  # Perform Lucene search using the query  
+def search_and_rank_products(keyword, df):
     # Filter products based on the keyword in the product title
     matched_products = df[df['product_title'].str.contains(keyword, case=False, na=False)]
     
@@ -131,6 +130,13 @@ def search_and_rank_products(keyword, df, searcher):
     
     return ranked_products[['product_id', 'product_title', 'avg_sentiment_score', 'avg_rating']]
 
+# Function to search and rank products based on a keyword
+def lucene_search_rank_products(keyword, searcher):
+    # Perform Lucene query to find products containing the keyword in the title
+    makeQuery(searcher,keyword)  # Perform Lucene search using the query  
+    
+    return 
+
 # Main function to interact with the user and execute different options
 def main():
 
@@ -144,7 +150,7 @@ def main():
     print("Welcome to RetailRadar Insight!")
     
     # Prompt the user for an action choice
-    action = input("Choose an action: (1) Search Products, (2) Compare Products, (3) Top Ranked Products by Keyword: ")
+    action = input("Choose an action: (1) Search Products, (2) Compare Products, (3) Top Ranked Products by Keyword, (4) Lucene Index search by Keyword : ")
     
     # Handle user input based on the chosen action
     if action == '1':
@@ -162,12 +168,16 @@ def main():
     elif action == '3':
         # Top-ranked products search by keyword
         keyword = input("Enter a keyword to find top-ranked products: ")
-        top_ranked_products = search_and_rank_products(keyword, data, searcher)
+        top_ranked_products = search_and_rank_products(keyword, data)
         print("Top 10 Ranked Products:\n", top_ranked_products)
         
         # Visualize the top-ranked products
         create_bar_graph_for_top_10_products(top_ranked_products)
         create_dual_axis_bar_chart(top_ranked_products)
+    elif action == '4':
+        # Top-ranked products search by keyword
+        keyword = input("Enter a keyword to find top-ranked products: ")
+        top_ranked_products = lucene_search_rank_products(keyword, searcher)        
     else:
         print("Invalid choice, please select 1, 2, or 3.")
 
