@@ -1,5 +1,7 @@
 from pyserini.search.lucene import LuceneSearcher
 import subprocess
+from flask import jsonify
+import json
 
 def luceneIndexBuilder(directory):
     # Build the Lucene index using subprocess
@@ -23,15 +25,34 @@ def makeQuery(searcher,keyword):
 
     # Print the search results with content
     print(f"Results for query '{keyword}':")
+    results = []
     for i, hit in enumerate(hits, start=1):
         # Retrieve the document by ID
         doc = searcher.doc(hit.docid)
-        
         # Check if the document exists, then extract the content
         if doc is not None:
-            content = doc.raw()  # `raw()` retrieves the document content as a string
-            print(f'{i:2} {hit.docid:4} {hit.score:.5f}\nContent: {content}\n')
+                raw_doc = doc.raw()  # Assume `raw_doc` is JSON-formatted string
+                product = extract_fields(raw_doc)  # Convert raw document to a product object
+                results.append(product)
         else:
-            print(f'{i:2} {hit.docid:4} {hit.score:.5f}\nContent: Document not found\n')
+                results.append({"docid": hit.docid, "error": "Document not found"})
+    return jsonify({"results": results})            
 
   # Then pass the searcher to the query function
+
+
+def extract_fields(raw_doc):
+    try:
+        doc = json.loads(raw_doc)  # Convert raw string to dictionary
+        
+        # Extract fields from the top level and the nested "NER" object
+        return {
+            "product_title": doc["NER"].get("product_title"),
+            "product_category": doc["NER"].get("product_category"),
+            "star_rating": doc["NER"].get("star_rating"),
+            "Popular_Review": doc.get("contents", "")[:500],
+        }
+    except json.JSONDecodeError:
+        return {"error": "Invalid document format"}
+    except KeyError as e:
+        return {"error": f"Missing key: {e}"}

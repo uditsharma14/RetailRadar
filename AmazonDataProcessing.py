@@ -5,7 +5,9 @@ from nltk.corpus import stopwords
 from AmazonSentimentAnalsys import get_sentiment  # Module for sentiment analysis
 from LuceneReviewProcesser import luceneIndexBuilder, makeQuery  # Module for Lucene indexing and search
 from VisualRepresentation import create_bar_graph_for_top_5, create_pie_for_review_sentiment, create_bar_graph_for_top_10_products, create_dual_axis_bar_chart
-
+# Initialize global dataset and searcher
+global_data_set = None
+global_searcher = None
 # Download stopwords if you haven't already
 nltk.download('stopwords')
 # Function to remove stopwords from the text
@@ -25,8 +27,8 @@ def remove_stopwords(text):
 # Function to read the review dataset and return a DataFrame
 def review_dataset_reader():
     # Load the dataset with error handling for bad lines
-    #file_path = '/Users/uditsharma/Downloads/amazon_reviews_us_Personal_Care_Appliances_v1_00.tsv'
-    file_path = '/Users/prabhatsingh/Documents/UIUC/CS410/OurProject/InputData/MoreDetailedInput/amazon_reviews_us_Personal_Care_Appliances_v1_00.tsv'
+    file_path = '/Users/uditsharma/Downloads/amazon_reviews_us_Personal_Care_Appliances_v1_00.tsv'
+    #file_path = '/Users/prabhatsingh/Documents/UIUC/CS410/OurProject/InputData/MoreDetailedInput/amazon_reviews_us_Personal_Care_Appliances_v1_00.tsv'
     data = pd.read_csv(file_path, sep='\t', on_bad_lines='skip')  # Read the file, skipping any problematic lines
 
     # Preview the dataset (usually just for reference)
@@ -133,9 +135,21 @@ def search_and_rank_products(keyword, df):
 # Function to search and rank products based on a keyword
 def lucene_search_rank_products(keyword, searcher):
     # Perform Lucene query to find products containing the keyword in the title
-    makeQuery(searcher,keyword)  # Perform Lucene search using the query  
+    results = makeQuery(searcher,keyword)  # Perform Lucene search using the query  
+    return results
+
+
+def prepare_data():
+    global global_data_set, global_searcher
+    global_data_set = review_dataset_reader()
+    calculate_sentiment_score(global_data_set)
+    global_searcher = luece_data_processor(global_data_set)
     
-    return 
+def search_handler(keyword):
+     # Read the review dataset and calculate sentiment
+    # Process data for Lucene indexing
+    top_ranked_products = lucene_search_rank_products(keyword, global_searcher)  
+    return top_ranked_products
 
 # Main function to interact with the user and execute different options
 def main():
