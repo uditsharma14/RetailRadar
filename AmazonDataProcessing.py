@@ -191,7 +191,8 @@ def main():
     elif action == '4':
         # Top-ranked products search by keyword
         keyword = input("Enter a keyword to find top-ranked products: ")
-        top_ranked_products = lucene_search_rank_products(keyword, searcher)        
+        top_ranked_products = lucene_search_rank_products(keyword, searcher)      
+        print(top_ranked_products)  
     else:
         print("Invalid choice, please select 1, 2, or 3.")
 
