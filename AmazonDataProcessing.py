@@ -3,7 +3,7 @@ import pandas as pd
 import nltk
 from nltk.corpus import stopwords
 from AmazonSentimentAnalsys import get_sentiment  # Module for sentiment analysis
-from LuceneReviewProcesser import luceneIndexBuilder, makeQuery  # Module for Lucene indexing and search
+from LuceneReviewProcesser import luceneIndexBuilder, makeQuery,makeQueryForCLI  # Module for Lucene indexing and search
 from VisualRepresentation import create_bar_graph_for_top_5, create_pie_for_review_sentiment, create_bar_graph_for_top_10_products, create_dual_axis_bar_chart
 # Initialize global dataset and searcher
 global_data_set = None
@@ -133,10 +133,17 @@ def search_and_rank_products(keyword, df):
     return ranked_products[['product_id', 'product_title', 'avg_sentiment_score', 'avg_rating']]
 
 # Function to search and rank products based on a keyword
-def lucene_search_rank_products(keyword, searcher):
+def search_rank_products(keyword, searcher):
     # Perform Lucene query to find products containing the keyword in the title
     results = makeQuery(searcher,keyword)  # Perform Lucene search using the query  
     return results
+
+# Function to search and rank products based on a keyword
+def lucene_search_rank_products(keyword, searcher):
+    # Perform Lucene query to find products containing the keyword in the title
+    results = makeQueryForCLI(searcher,keyword)  # Perform Lucene search using the query  
+    return results
+
 
 
 def prepare_data():
@@ -148,7 +155,7 @@ def prepare_data():
 def search_handler(keyword):
      # Read the review dataset and calculate sentiment
     # Process data for Lucene indexing
-    top_ranked_products = lucene_search_rank_products(keyword, global_searcher)  
+    top_ranked_products = search_rank_products(keyword, global_searcher)  
     return top_ranked_products
 
 # Main function to interact with the user and execute different options

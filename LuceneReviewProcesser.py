@@ -19,10 +19,29 @@ def luceneIndexBuilder(directory):
     searcher = LuceneSearcher("index/test")
     return searcher
 
+def makeQueryForCLI(searcher,keyword):   
+    # Perform a search query
+    hits = searcher.search(f'{keyword}')  
+    print("Keyword in input" , keyword)
+    # Print the search results with content
+    print(f"Results for query '{keyword}':")
+    results = []
+    for i, hit in enumerate(hits, start=1):
+        # Retrieve the document by ID
+        doc = searcher.doc(hit.docid)
+        # Check if the document exists, then extract the content
+        if doc is not None:
+                raw_doc = doc.raw()  # Assume `raw_doc` is JSON-formatted string
+                print(raw_doc)
+        else:
+                results.append({"docid": hit.docid, "error": "Document not found"})       
+    
+    return ;
+
 def makeQuery(searcher,keyword):   
     # Perform a search query
     hits = searcher.search(f'{keyword}')  
-
+    print("Keyword in input" , keyword)
     # Print the search results with content
     print(f"Results for query '{keyword}':")
     results = []
@@ -36,7 +55,8 @@ def makeQuery(searcher,keyword):
                 results.append(product)
         else:
                 results.append({"docid": hit.docid, "error": "Document not found"})
-    return jsonify({"results": results})            
+    
+    return jsonify({"results": results})      
 
   # Then pass the searcher to the query function
 
