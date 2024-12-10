@@ -27,7 +27,7 @@ def remove_stopwords(text):
 # Function to read the review dataset and return a DataFrame
 def review_dataset_reader():
     # Load the dataset with error handling for bad lines
-    file_path = '/Users/uditsharma/Downloads/amazon_reviews_us_Personal_Care_Appliances_v1_00.tsv'
+    file_path = 'data/dataset/amazon-reviews-us-Personal-Care-Appliances-v1-00-tsv.tsv'
     #file_path = '/Users/prabhatsingh/Documents/UIUC/CS410/OurProject/InputData/MoreDetailedInput/amazon_reviews_us_Personal_Care_Appliances_v1_00.tsv'
     data = pd.read_csv(file_path, sep='\t', on_bad_lines='skip')  # Read the file, skipping any problematic lines
 
