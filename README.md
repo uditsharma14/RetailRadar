@@ -95,5 +95,16 @@ RetailRadar provides three primary ways to view data:
 * **Price Tracking:** Correlating sentiment trends with price fluctuations.
 * **Multi-Platform Support:** Expanding datasets to include eBay and Walmart reviews.
 
----
-**Developed as part of the CS 410 Coursework at UIUC.**
+Example : 
+
+Fetch and visualize the top-ranked products.
+
+<img width="468" height="452" alt="image" src="https://github.com/user-attachments/assets/cda2db7b-3559-49be-a494-eeec039f3f53" />
+
+</br>
+
+<img width="468" height="298" alt="image" src="https://github.com/user-attachments/assets/63cd7382-d2d8-46a4-b139-bead13f3650e" />
+
+
+
+
